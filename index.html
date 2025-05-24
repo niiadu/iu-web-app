@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jo's Book Collections</title>
+    <style>
+      table {
+        width: 50%;
+      }
+      th,
+      td {
+        background-color: #f2f2f2;
+        text-align: left;
+        padding: 10px;
+        box-shadow: 5px 5px 5px 5px #dbd9d9;
+      }
+      h3,
+      h2 {
+        color: seagreen;
+      }
+      button {
+        background-color: #00ffff;
+        padding: 8px;
+      }
+      #remove-err,
+      #updateError {
+        color: red;
+      }
+      .updatedBookList p {
+        padding: 10px;
+        margin: 10px;
+      }
+      .updatedBookList input {
+        margin-left: 20px;
+      }
+
+      input {
+        padding: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Books List</h2>
+    <table id="tableOfListedBooks">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Year</th>
+          <th>Genre</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="updatedBookList">
+      <h3>Update Book</h3>
+      <div>
+        <p>New Book Title: <input id="titleUpdate" type="text" /></p>
+      </div>
+      <div>
+        <p>New Title: <input id="newTitle" type="text" /></p>
+      </div>
+      <div>
+        <p>Author: <input id="newAuthor" type="text" /></p>
+      </div>
+      <div>
+        <p>Year: <input id="newYear" type="text" /></p>
+      </div>
+      <div>
+        <p>Genre: <input id="newGenre" type="text" /></p>
+      </div>
+      <div><button onclick="updateBook()">Update</button></div>
+      <div id="updateError" class="error"></div>
+    </div>
+    <h3>Remove Book</h3>
+    <p>Book Title <input type="text" id="remove-title" /></p>
+    <div><button onclick="removeBook()">Remove</button></div>
+    <div id="remove-err"></div>
+
+    <script>
+      let bookDetails = {
+        books: [
+          {
+            title: "Harry Potter",
+            author: "J.K. Rowling",
+            year: 1997,
+            genre: "Fantasy",
+          },
+          {
+            title: "Database Internals: A Deep Dive into How Distributed Data Systems",
+            author: "Alex Petrov",
+            year: 2019,
+            genre: "Computer Science",
+          },
+          {
+            title: "A Clash of Kings",
+            author: "George Martin",
+            year: 1998,
+            genre: "Fantasy",
+          },
+        ],
+      };
+
+      function updateBook() {
+        const titleUpdate = document.getElementById("titleUpdate").value;
+        const newTitle = document.getElementById("newTitle").value;
+        const currentAuthor = document.getElementById("newAuthor").value;
+        const year = document.getElementById("newYear").value;
+        const genre = document.getElementById("newGenre").value;
+        const errDiv = document.getElementById("updateError");
+        errDiv.textContent = "";
+
+        if (!titleUpdate || !newTitle || !currentAuthor || !year || !genre) {
+          errDiv.textContent = "All fields are required and must not be empty.";
+          return;
+        }
+        if (isNaN(year) || year <= 0) {
+          errDiv.textContent = `Year of publication must be a valid interger. ${year} is not.`;
+          return;
+        }
+
+        const bookIndex = bookDetails.books.findIndex(
+          (b) => b.title.toLowerCase() === titleUpdate.toLowerCase()
+        );
+        if (bookIndex === -1) {
+          errDiv.textContent = `Book with title ${titleUpdate} not found.`;
+          return;
+        }
+
+        bookDetails.books[bookIndex] = {
+          title: newTitle,
+          author: currentAuthor,
+          year: parseInt(year),
+          genre: genre,
+        };
+
+        showListofBooks();
+        emptyUpdatedForm();
+      }
+
+      function showListofBooks() {
+        const bodyOfTable = document
+          .getElementById("tableOfListedBooks")
+          .getElementsByTagName("tbody")[0];
+        bodyOfTable.innerHTML = "";
+
+        bookDetails.books.forEach((book) => {
+          const row = document.createElement("tr");
+          ["title", "author", "year", "genre"].forEach((prop) => {
+            const cell = document.createElement("td");
+            cell.textContent = book[prop];
+            row.appendChild(cell);
+          });
+          bodyOfTable.appendChild(row);
+        });
+      }
+
+      window.onload = showListofBooks;
+
+      function removeBook() {
+        const bookTitleToRemove = document
+          .getElementById("remove-title")
+          .value.trim();
+        const errDiv = document.getElementById("remove-err");
+        errDiv.textContent = "";
+
+        if (!bookTitleToRemove) {
+          errDiv.textContent =
+            "Book title is a requirement and cannot be empty.";
+          return;
+        }
+
+        const index = bookDetails.books.findIndex(
+          (b) => b.title.toLowerCase() === bookTitleToRemove.toLowerCase()
+        );
+        if (index === -1) {
+          errDiv.textContent = `Book title ${bookTitleToRemove} not found.`;
+          return;
+        }
+
+        bookDetails.books.splice(index, 1);
+        showListofBooks();
+        document.getElementById("remove-title").value = "";
+      }
+
+      function emptyUpdatedForm() {
+        ["titleUpdate", "newTitle", "newAuthor", "newYear", "newGenre"].forEach(
+          (id) => {
+            document.getElementById(id).value = "";
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
